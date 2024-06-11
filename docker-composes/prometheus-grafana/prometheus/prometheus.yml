@@ -1,0 +1,39 @@
+global:
+  scrape_interval: 15s
+  scrape_timeout: 10s
+  evaluation_interval: 15s
+alerting:
+  alertmanagers:
+  - static_configs:
+    - targets: []
+    scheme: http
+    timeout: 10s
+    api_version: v1
+scrape_configs:
+
+- job_name: prometheus
+  scrape_interval: 15s
+  static_configs:
+    - targets:
+      - localhost:9090
+
+
+- job_name: easyevents.metrics
+  honor_timestamps: true
+  scrape_interval: 15s
+  scrape_timeout: 10s
+  metrics_path: /above-board/metrics
+  scheme: https
+  static_configs:
+  - targets:
+    - beeasyevents.pandatech.it
+
+- job_name: easyevents.metrics.health
+  honor_timestamps: true
+  scrape_interval: 15s
+  scrape_timeout: 10s
+  metrics_path: /above-board/metrics/health
+  scheme: https
+  static_configs:
+  - targets:
+    - beeasyevents.pandatech.it
