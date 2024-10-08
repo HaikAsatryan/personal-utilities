@@ -92,6 +92,7 @@ winget install -e --id AnyDeskSoftwareGmbH.AnyDesk
 winget install -e --id TeamViewer.TeamViewer
 winget install -e --id Logitech.
 winget install -e --id qishibo.AnotherRedisDesktopManager
+winget install -e --id TheBrowserCompany.Arc
 ```
 
 ### Applications to Check Manually
