@@ -93,6 +93,7 @@ winget install -e --id TeamViewer.TeamViewer
 winget install -e --id Logitech.
 winget install -e --id qishibo.AnotherRedisDesktopManager
 winget install -e --id TheBrowserCompany.Arc
+winget install -e --id PrimateLabs.Geekbench.6
 ```
 
 ### Applications to Check Manually
