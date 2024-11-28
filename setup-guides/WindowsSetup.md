@@ -32,7 +32,7 @@ _After making these changes, restart your computer to ensure all settings are ap
 ### Generate SSH Key
 
 ```pwsh
-ssh-keygen -b 4096
+ssh-keygen -b 4096 -t rsa -C "dell-xps-15"
 ```
 
 ## Applications Installation
