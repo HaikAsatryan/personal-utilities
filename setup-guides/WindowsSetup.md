@@ -79,7 +79,7 @@ winget install -e --id Valve.Steam
 winget install -e --id Mirantis.Lens
 winget install -e --id Microsoft.DotNet.SDK.8
 winget install -e --id Notepad++.Notepad++
-winget install -e --id Microsoft.VisualStudioCode
+winget install -e --id Microsoft.VisualStudioCode --scope machine
 winget install -e --id Git.Git
 winget install -e --id Python.Python.3.13
 winget install -e --id Postman.Postman
