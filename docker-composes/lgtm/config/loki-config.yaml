@@ -1,0 +1,52 @@
+server:
+  http_listen_port: 3100
+
+distributor:
+  ring:
+    kvstore:
+      store: inmemory
+
+ingester:
+  lifecycler:
+    address: 127.0.0.1
+    ring:
+      kvstore:
+        store: inmemory
+
+querier:
+  query_ingesters_within: 2h
+
+query_range:
+  cache_results: false
+
+schema_config:
+  configs:
+    - from: 2020-10-24
+      store: boltdb-shipper
+      object_store: filesystem
+      schema: v11
+      index:
+        prefix: index_
+        period: 24h
+
+storage_config:
+  boltdb_shipper:
+    active_index_directory: /tmp/loki/boltdb-shipper-active
+    cache_location: /tmp/loki/boltdb-shipper-cache
+    shared_store: filesystem
+  filesystem:
+    directory: /tmp/loki/chunks
+
+limits_config:
+  ingestion_rate_mb: 2
+  ingestion_burst_size_mb: 4
+  max_concurrent_tail_requests: 20
+
+ruler:
+  storage:
+    type: local
+    local:
+      directory: /tmp/loki/rules
+  ring:
+    kvstore:
+      store: inmemory
