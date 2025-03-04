@@ -1,0 +1,41 @@
+services:
+  loki:
+    image: grafana/loki:latest
+    container_name: loki
+    environment:
+      - LOKI_RING_CONSISTENCY=weak  # Disable strong consistency for single node setup
+    ports:
+      - "3100:3100"
+    volumes:
+      - ./config/loki-config.yaml:/etc/loki/loki-config.yaml
+    restart: always
+    deploy:
+      replicas: 1
+
+  promtail:
+    image: grafana/promtail:latest
+    container_name: promtail
+    command: -config.file=/etc/promtail/promtail.yaml
+    volumes:
+      - ./config/promtail-config.yaml:/etc/promtail/promtail.yaml
+      - /var/log:/var/log
+    restart: always
+    depends_on:
+      - loki
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana-data:/var/lib/grafana
+    restart: always
+    depends_on:
+      - loki
+      - promtail
+
+volumes:
+  grafana-data:

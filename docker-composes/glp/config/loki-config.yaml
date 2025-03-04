@@ -1,0 +1,32 @@
+auth_enabled: false
+
+server:
+  http_listen_port: 3100
+  grpc_listen_port: 9095
+
+ring:
+  kvstore:
+    store: inmemory  # In-memory KV store for development
+    consistent_hashing: false  # Disable consistent hashing
+  replication_factor: 1  # Single replica for development
+  min_ring_size: 512
+
+frontend_worker:
+  grpc_timeout: 1m
+  query_timeout: 1m
+  max_query_length: 0
+
+distributor:
+  ring:
+    kvstore:
+      store: inmemory
+    replication_factor: 1
+
+# storage configuration (using local storage for simplicity)
+storage_config:
+  boltdb_shipper:
+    directory: /tmp/loki/index
+  filesystem:
+    directory: /tmp/loki/chunks
+
+chunk_target_size: 1048576
