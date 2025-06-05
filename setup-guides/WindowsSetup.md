@@ -77,7 +77,7 @@ winget install -e --id Ookla.Speedtest.Desktop
 winget install -e --id WireGuard.WireGuard
 winget install -e --id Valve.Steam
 winget install -e --id Mirantis.Lens
-winget install -e --id Microsoft.DotNet.SDK.8
+winget install -e --id Microsoft.DotNet.SDK.9
 winget install -e --id Notepad++.Notepad++
 winget install -e --id Microsoft.VisualStudioCode --scope machine
 winget install -e --id Git.Git
@@ -94,6 +94,8 @@ winget install -e --id Logitech.
 winget install -e --id qishibo.AnotherRedisDesktopManager
 winget install -e --id TheBrowserCompany.Arc
 winget install -e --id PrimateLabs.Geekbench.6
+winget install -e --id RustDesk.RustDesk  
+winget install -e --id JanDeDobbeleer.OhMyPosh  
 ```
 
 ### Applications to Check Manually

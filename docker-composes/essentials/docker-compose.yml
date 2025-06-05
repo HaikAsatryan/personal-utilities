@@ -5,8 +5,8 @@ volumes:
     driver: local
   postgres:
     driver: local
-  pgadmin:
-    driver: local
+  # pgadmin:
+  #   driver: local
   # redisinsight:
   #   driver: local
   # oracle_db:
@@ -79,18 +79,18 @@ services:
 # PgAdmin
 # ---------------------------------------------------------------------------------
 
-  pg-admin:
-    container_name: pg_admin
-    image: dpage/pgadmin4:latest
-    restart: always
-    ports:
-      - "5050:80"
-    #in pgAdmin set Host name/address to host.docker.internal or postgres_db in linux
-    environment:
-      - PGADMIN_DEFAULT_EMAIL=test@pandatech.it
-      - PGADMIN_DEFAULT_PASSWORD=test
-    volumes:
-      - pgadmin:/var/lib/pgadmin
+  # pg-admin:
+  #   container_name: pg_admin
+  #   image: dpage/pgadmin4:latest
+  #   restart: always
+  #   ports:
+  #     - "5050:80"
+  #   #in pgAdmin set Host name/address to host.docker.internal or postgres_db in linux
+  #   environment:
+  #     - PGADMIN_DEFAULT_EMAIL=test@pandatech.it
+  #     - PGADMIN_DEFAULT_PASSWORD=test
+  #   volumes:
+  #     - pgadmin:/var/lib/pgadmin
 
 # ---------------------------------------------------------------------------------
 # Redis Insight
