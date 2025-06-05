@@ -7,10 +7,43 @@ This guide details post-installation setup and customization for Linux, specific
 
 **Ubuntu**
 ```bash
+# Update and upgrade system
 sudo apt update && sudo apt upgrade -y
-sudo apt-get install gdebi -y
-sudo apt install glances htop ubuntu-restricted-extras fish -y
+
+# Install essential tools
+sudo apt install gdebi glances htop ubuntu-restricted-extras fish unzip -y
+
+# Set Fish as default shell
 chsh -s /usr/bin/fish
+
+# Install Oh My Posh
+mkdir -p ~/.local/bin
+curl -s https://ohmyposh.dev/install.sh | bash -s -- -d ~/.local/bin
+
+# Download and extract themes
+curl -Lo ~/.poshthemes.zip https://github.com/JanDeDobbeleer/oh-my-posh/releases/latest/download/themes.zip
+mkdir -p ~/.poshthemes
+unzip -o ~/.poshthemes.zip -d ~/.poshthemes
+chmod u+rw ~/.poshthemes/*.omp.json
+rm ~/.poshthemes.zip
+
+# Add Oh My Posh to Fish config
+nano ~/.config/fish/config.fish
+```
+Inside `~/.config/fish/config.fish`, append:
+
+```bash
+# Add local bin to PATH
+set -gx PATH $PATH ~/.local/bin
+
+# Init Oh My Posh with desired theme
+oh-my-posh init fish --config ~/.poshthemes/jandedobbeleer.omp.json | source
+```
+
+Reload Fish shell:
+
+```bash
+exec fish
 ```
 
 **Fedora**
