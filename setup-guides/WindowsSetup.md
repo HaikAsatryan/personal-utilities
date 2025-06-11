@@ -95,7 +95,8 @@ winget install -e --id qishibo.AnotherRedisDesktopManager
 winget install -e --id TheBrowserCompany.Arc
 winget install -e --id PrimateLabs.Geekbench.6
 winget install -e --id RustDesk.RustDesk  
-winget install -e --id JanDeDobbeleer.OhMyPosh  
+winget install -e --id JanDeDobbeleer.OhMyPosh
+winget install -e --id WinSCP.WinSCP
 ```
 
 ### Applications to Check Manually
