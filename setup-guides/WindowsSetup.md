@@ -97,6 +97,7 @@ winget install -e --id PrimateLabs.Geekbench.6
 winget install -e --id RustDesk.RustDesk  
 winget install -e --id JanDeDobbeleer.OhMyPosh
 winget install -e --id WinSCP.WinSCP
+winget install -e --id DevToys-app.DevToys
 ```
 
 ### Applications to Check Manually
