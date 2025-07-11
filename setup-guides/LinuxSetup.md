@@ -1,7 +1,9 @@
-# Comprehensive Linux Setup Guide for Ubuntu 24.04 and Fedora 40
+# Comprehensive Linux Setup Guide for Ubuntu 25.04 and Fedora 41
 
 ## Introduction
-This guide details post-installation setup and customization for Linux, specifically targeting Ubuntu 24.04 and Fedora 40, with Gnome 46 as the desktop environment.
+This guide details post-installation setup and customization for Linux, specifically targeting Ubuntu 25.04 and Fedora 41, with Gnome 48 as the desktop environment.
+
+
 
 ## System Updates and Basic Tool Installation
 
@@ -10,49 +12,7 @@ This guide details post-installation setup and customization for Linux, specific
 # Update and upgrade system
 sudo apt update && sudo apt upgrade -y
 
-# Install essential tools
-sudo apt install gdebi glances htop ubuntu-restricted-extras fish unzip -y
-
-# Set Fish as default shell
-chsh -s /usr/bin/fish
-
-# Install Oh My Posh
-mkdir -p ~/.local/bin
-curl -s https://ohmyposh.dev/install.sh | bash -s -- -d ~/.local/bin
-
-# Download and extract themes
-curl -Lo ~/.poshthemes.zip https://github.com/JanDeDobbeleer/oh-my-posh/releases/latest/download/themes.zip
-mkdir -p ~/.poshthemes
-unzip -o ~/.poshthemes.zip -d ~/.poshthemes
-chmod u+rw ~/.poshthemes/*.omp.json
-rm ~/.poshthemes.zip
-
-# Add Oh My Posh to Fish config
-nano ~/.config/fish/config.fish
 ```
-Inside `~/.config/fish/config.fish`, append:
-
-```bash
-# Add local bin to PATH
-set -gx PATH $PATH ~/.local/bin
-
-# Init Oh My Posh with desired theme
-oh-my-posh init fish --config ~/.poshthemes/jandedobbeleer.omp.json | source
-```
-
-Reload Fish shell:
-
-```bash
-exec fish
-```
-
-**Fedora**
-```bash
-sudo dnf upgrade --refresh
-sudo dnf install glances htop fish -y
-chsh -s /usr/bin/fish
-```
-*Note: After installing `fish`, a system reboot is recommended before proceeding.*
 
 
 ## Essential Gnome Customizations
@@ -73,12 +33,12 @@ gsettings set org.gnome.shell.extensions.dash-to-dock click-action 'minimize' //
 
 ### Manual Installation and Configuration of Gnome Extensions
 
+From App Center first install `Extension Manager` with blue icon.
+
 *Extensions like Pano and TopBar are not compatible with GNOME 46 yet.*
 
 
 - **System Monitor:** Primary monitoring tool (Astra Monitor is a popular alternative).
-- **Pano - Clipboard manager:** Clipboard manager, use Super+V to paste, similar to Windows (Clipboard Indicator is another alternative).
-- **Apps Menu and Places Status Indicator:** For easy access to apps and places.
 - **Top Bar Organizer:** Customize the order of top bar elements.
 - **Dash to Dock:** Enhance your dock (Ubuntu comes with a default dock).
 - **Wiggle:** Easily locate your mouse cursor.
@@ -92,7 +52,8 @@ gsettings set org.gnome.shell.extensions.dash-to-dock click-action 'minimize' //
 - **WireGuard VPN Extension:** Optional, for WireGuard VPN users.
 - **No Overview at Startup:** Optionally disables the overview on startup.
 - **Color Picker:** Useful tool for designers and frontend developers.
-- **X11 Gestures:** Enhances touchpad shortcuts (requires Touchegg; not needed in Fedora).
+- **Logo Menu:** Instead of actions in top bar changes it with perfect button.
+- **Clipboard Indicator:** Windows ctrl + shift + v alternative. Also there is Pano extension for same thing. 
 
 ## SSH Configuration
 
@@ -125,7 +86,7 @@ Follow official installation guides:
 - Install docker-compose - https://docs.docker.com/compose/install/linux/#install-using-the-repository
 - Install docker desktop - https://docs.docker.com/desktop/install/ubuntu/
 
-Docker might bring severel problems after installation. Below will describe some problems and provide the solutions:
+Docker might bring several problems after installation. Below will describe some problems and provide the solutions:
 
 ### Common Docker Issues and Fixes
 
@@ -147,7 +108,6 @@ source ~/.bashrc
 - .Net Sdk
 - JetBrains Toolbox (from the official site)
 - Notepad++
-- Bitwarden
 - VsCode
 - Postman
 - LibreOffice
@@ -155,5 +115,54 @@ source ~/.bashrc
 - Telegram
 - Whatsapp
 - Google chrome
-- Slack
 - Teams
+
+
+## Unused
+```bash
+
+# Install essential tools
+sudo apt install gdebi glances htop ubuntu-restricted-extras fish unzip -y
+
+# Set Fish as default shell
+chsh -s /usr/bin/fish
+
+# Install Oh My Posh
+mkdir -p ~/.local/bin
+curl -s https://ohmyposh.dev/install.sh | bash -s -- -d ~/.local/bin
+
+# Download and extract themes
+curl -Lo ~/.poshthemes.zip https://github.com/JanDeDobbeleer/oh-my-posh/releases/latest/download/themes.zip
+mkdir -p ~/.poshthemes
+unzip -o ~/.poshthemes.zip -d ~/.poshthemes
+chmod u+rw ~/.poshthemes/*.omp.json
+rm ~/.poshthemes.zip
+
+# Add Oh My Posh to Fish config
+nano ~/.config/fish/config.fish
+
+```
+Inside `~/.config/fish/config.fish`, append:
+```bash
+# Add local bin to PATH
+set -gx PATH $PATH ~/.local/bin
+
+# Init Oh My Posh with desired theme
+oh-my-posh init fish --config ~/.poshthemes/jandedobbeleer.omp.json | source
+```
+
+Reload Fish shell:
+
+```bash
+exec fish
+```
+
+**Fedora**
+```bash
+sudo dnf upgrade --refresh
+sudo dnf install glances htop fish -y
+chsh -s /usr/bin/fish
+```
+*Note: After installing `fish`, a system reboot is recommended before proceeding.*
+
+---
