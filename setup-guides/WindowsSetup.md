@@ -92,12 +92,11 @@ winget install -e --id AnyDeskSoftwareGmbH.AnyDesk
 winget install -e --id TeamViewer.TeamViewer
 winget install -e --id Logitech.
 winget install -e --id qishibo.AnotherRedisDesktopManager
-winget install -e --id TheBrowserCompany.Arc
 winget install -e --id PrimateLabs.Geekbench.6
 winget install -e --id RustDesk.RustDesk  
-winget install -e --id JanDeDobbeleer.OhMyPosh
 winget install -e --id WinSCP.WinSCP
 winget install -e --id DevToys-app.DevToys
+winget install -e --id AltSnap.AltSnap
 ```
 
 ### Applications to Check Manually
