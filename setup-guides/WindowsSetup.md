@@ -22,6 +22,7 @@ wsl --install
 
 - **Wallpaper and Theme:** Personalize your desktop by setting a new wallpaper and selecting a theme that suits your taste.
 - **Keyboard and Fonts:** Adjust keyboard settings and install any desired fonts.
+- **Dev Settings:** Adjust developer settings.
 - **Configure OneDrive:** Set up and sync your files with OneDrive for cloud storage.
 - **Link Your Phone:** Connect and configure your mobile device with Windows for seamless integration.
 - **Folder Options:** Enable the visibility of hidden files and folders and extensions via File Explorer options.
@@ -68,16 +69,14 @@ This tool helps streamline the installation and maintenance of software, ensurin
 The following applications can typically be found in the `winget` repository. Use the `winget install` command with the appropriate ID:
 
 ```pwsh
-winget install -e --id Microsoft.PowerShell
 winget install -e --id Microsoft.PowerToys
-winget install -e --id Google.Chrome
 winget install -e --id Google.GoogleDrive
 winget install -e --id PostgreSQL.pgAdmin
 winget install -e --id Ookla.Speedtest.Desktop
 winget install -e --id WireGuard.WireGuard
-winget install -e --id Valve.Steam
 winget install -e --id Mirantis.Lens
 winget install -e --id Microsoft.DotNet.SDK.9
+winget install -e --id Microsoft.DotNet.SDK.8
 winget install -e --id Notepad++.Notepad++
 winget install -e --id Microsoft.VisualStudioCode --scope machine
 winget install -e --id Git.Git
@@ -85,18 +84,18 @@ winget install -e --id Python.Python.3.13
 winget install -e --id Postman.Postman
 winget install -e --id VideoLAN.VLC
 winget install -e --id Telegram.TelegramDesktop
-winget install -e --id SlackTechnologies.Slack
 winget install -e --id Microsoft.Teams
-winget install -e --id Discord.Discord
 winget install -e --id AnyDeskSoftwareGmbH.AnyDesk
 winget install -e --id TeamViewer.TeamViewer
-winget install -e --id Logitech.
 winget install -e --id qishibo.AnotherRedisDesktopManager
-winget install -e --id PrimateLabs.Geekbench.6
 winget install -e --id RustDesk.RustDesk  
 winget install -e --id WinSCP.WinSCP
 winget install -e --id DevToys-app.DevToys
 winget install -e --id AltSnap.AltSnap
+winget install -e --id JetBrains.Toolbox
+winget install -e --id Docker.DockerDesktop
+winget install -e --id OpenVPNTechnologies.OpenVPN
+winget install -e --id k6.k6
 ```
 
 ### Applications to Check Manually
@@ -104,8 +103,6 @@ Some applications might not be available via `winget` or you may prefer to downl
 
 - WhatsApp (winget exists as well but had issues with it)
 - Bitwarden (winget exists as well but had issues with it)
-- JetBrains Toolbox (winget exists as well but had issues with it)
-- Docker Desktop (winget exists as well but had issues with it)
 - Microsoft To Do
 - iVMS 4200 AC client
 - EzStation
