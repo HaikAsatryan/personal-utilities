@@ -3,6 +3,7 @@ set -e
 
 EMAIL="haik.asatryan.95@gmail.com"
 CODENAME=$(lsb_release -cs)
+MS_CODENAME="noble"
 
 echo "🚀 Starting system setup for Ubuntu $CODENAME..."
 
@@ -24,7 +25,7 @@ chmod 644 ~/.ssh/id_rsa.pub
 # Microsoft repository for .NET SDK and VS Code
 wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor | sudo tee /usr/share/keyrings/microsoft.gpg > /dev/null
 echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/microsoft.gpg] https://packages.microsoft.com/repos/code stable main" | sudo tee /etc/apt/sources.list.d/vscode.list
-echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/microsoft.gpg] https://packages.microsoft.com/repos/microsoft-ubuntu-$CODENAME-prod $CODENAME main" | sudo tee /etc/apt/sources.list.d/microsoft.list
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/microsoft.gpg] https://packages.microsoft.com/repos/microsoft-ubuntu-$MS_CODENAME-prod $MS_CODENAME main" | sudo tee /etc/apt/sources.list.d/microsoft.list
 
 # Docker repository
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker.gpg
