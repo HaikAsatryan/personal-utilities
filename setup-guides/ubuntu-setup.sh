@@ -76,7 +76,7 @@ sudo apt-get install -y /tmp/chrome.deb || sudo apt-get -f install -y
 
 # --- Flatpak apps
 flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
-flatpak install -y flathub com.bitwarden.desktop org.telegram.desktop devtoys.app.DevToys qishibo.AnotherRedisDesktopManager
+flatpak install -y flathub com.bitwarden.desktop org.telegram.desktop  qishibo.AnotherRedisDesktopManager
 
 # --- Docker Desktop
 wget -qO /tmp/docker-desktop.deb https://desktop.docker.com/linux/main/amd64/docker-desktop-latest.deb
