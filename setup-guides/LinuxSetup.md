@@ -1,168 +1,191 @@
-# Comprehensive Linux Setup Guide for Ubuntu 25.04 and Fedora 41
+# Comprehensive Linux Setup Guide for Ubuntu 25.04
 
 ## Introduction
-This guide details post-installation setup and customization for Linux, specifically targeting Ubuntu 25.04 and Fedora 41, with Gnome 48 as the desktop environment.
 
-
-
-## System Updates and Basic Tool Installation
-
-**Ubuntu**
-```bash
-# Update and upgrade system
-sudo apt update && sudo apt upgrade -y
-
-```
-
-
-## Essential Gnome Customizations
-
-**Ubuntu**
-```bash
-sudo apt update
-sudo apt install gnome-tweaks gnome-shell-extension-manager -y
-gsettings set org.gnome.shell.extensions.dash-to-dock click-action 'minimize'
-sudo add-apt-repository ppa:touchegg/stable
-sudo apt install touchegg gnome-weather -y
-```
-
-**Fedora**
-```bash
-gsettings set org.gnome.shell.extensions.dash-to-dock click-action 'minimize' //not woooooooooooooooooooooooorking
-```
-
-### Manual Installation and Configuration of Gnome Extensions
-
-From App Center first install `Extension Manager` with blue icon.
-
-*Extensions like Pano and TopBar are not compatible with GNOME 46 yet.*
-
-
-- **System Monitor:** Primary monitoring tool (Astra Monitor is a popular alternative).
-- **Top Bar Organizer:** Customize the order of top bar elements.
-- **Dash to Dock:** Enhance your dock (Ubuntu comes with a default dock).
-- **Wiggle:** Easily locate your mouse cursor.
-- **AppIndicator and KStatusNotifierItem Support:** Essential for Docker Desktop functionality.
-- **Blur My Shell:** Adds beautiful blur effects.
-- **Weather O'clock:** Integrates weather into the clock (requires gnome-weather).
-- **Desktop Icons NG (DING):** Makes desktop icons functional (not needed in Ubuntu).
-- **Burn My Windows:** Adds animations to window actions.
-- **Caffeine:** Prevents the system from sleeping with a toggle button.
-- **Coverflow Alt-Tab:** Beautifies the alt-tab interface.
-- **WireGuard VPN Extension:** Optional, for WireGuard VPN users.
-- **No Overview at Startup:** Optionally disables the overview on startup.
-- **Color Picker:** Useful tool for designers and frontend developers.
-- **Logo Menu:** Instead of actions in top bar changes it with perfect button.
-- **Clipboard Indicator:** Windows ctrl + shift + v alternative. Also there is Pano extension for same thing. 
-
-## SSH Configuration
-
-**Ubuntu**
-
-```bash
-sudo apt install openssh-client openssh-server -y
-```
-
-**Fedora**
-
-```bash
-sudo dnf install openssh-clients openssh-server -y
-```
-
-**Both**
-
- ```bash
-systemctl enable ssh
-systemctl start ssh
-ssh-keygen -t rsa -b 4096 -C "your-email@example.com"
-chmod 600 ~/.ssh/id_rsa
-chmod 644 ~/.ssh/id_rsa.pub
-```
-
-## Docker Installation
-Follow official installation guides:
-
-- Install docker - https://docs.docker.com/engine/install/ubuntu/
-- Install docker-compose - https://docs.docker.com/compose/install/linux/#install-using-the-repository
-- Install docker desktop - https://docs.docker.com/desktop/install/ubuntu/
-
-Docker might bring several problems after installation. Below will describe some problems and provide the solutions:
-
-### Common Docker Issues and Fixes
-
-**Credentials Error:**
-
-```bash
-nano ~/.docker/config.json
-# Remove the "credsStore" line
-```
-**Docker Daemon Connection Issue:**
-
-```bash
-echo "export DOCKER_HOST=unix:///var/run/docker.sock" >> ~/.bashrc
-source ~/.bashrc
-```
-
-## Manually Installed Applications
-
-- .Net Sdk
-- JetBrains Toolbox (from the official site)
-- Notepad++
-- VsCode
-- Postman
-- LibreOffice
-- Vlc
-- Telegram
-- Whatsapp
-- Google chrome
-- Teams
-
-
-## Unused
-```bash
-
-# Install essential tools
-sudo apt install gdebi glances htop ubuntu-restricted-extras fish unzip -y
-
-# Set Fish as default shell
-chsh -s /usr/bin/fish
-
-# Install Oh My Posh
-mkdir -p ~/.local/bin
-curl -s https://ohmyposh.dev/install.sh | bash -s -- -d ~/.local/bin
-
-# Download and extract themes
-curl -Lo ~/.poshthemes.zip https://github.com/JanDeDobbeleer/oh-my-posh/releases/latest/download/themes.zip
-mkdir -p ~/.poshthemes
-unzip -o ~/.poshthemes.zip -d ~/.poshthemes
-chmod u+rw ~/.poshthemes/*.omp.json
-rm ~/.poshthemes.zip
-
-# Add Oh My Posh to Fish config
-nano ~/.config/fish/config.fish
-
-```
-Inside `~/.config/fish/config.fish`, append:
-```bash
-# Add local bin to PATH
-set -gx PATH $PATH ~/.local/bin
-
-# Init Oh My Posh with desired theme
-oh-my-posh init fish --config ~/.poshthemes/jandedobbeleer.omp.json | source
-```
-
-Reload Fish shell:
-
-```bash
-exec fish
-```
-
-**Fedora**
-```bash
-sudo dnf upgrade --refresh
-sudo dnf install glances htop fish -y
-chsh -s /usr/bin/fish
-```
-*Note: After installing `fish`, a system reboot is recommended before proceeding.*
+This guide provides a full setup process for Ubuntu 25.04 (GNOME 48), automating developer tools, environment configuration, and GNOME customizations.
+It includes a one-time script (`ubuntu-setup.sh`) to install and configure everything with minimal manual steps.
 
 ---
+
+## 1. Clean Installation and Preparation
+
+Start with a clean installation of **Ubuntu 25.04 Desktop**.  
+During installation, connect to Wi-Fi and select **Minimal Installation** if you prefer a lean system.
+
+After the first boot:
+
+1. Complete system updates through **Settings → About → Check for Updates**.
+2. Reboot once before proceeding.
+
+---
+
+## 2. Setup Script Configuration and Execution
+
+### Edit Before Use
+
+Before running the script, open it and adjust:
+
+- Email address for SSH key generation.
+- Add or remove software you prefer.
+- Review Flatpak apps section.
+
+### Run Script
+
+```bash
+sudo chmod +x ubuntu-setup.sh
+sudo ./ubuntu-setup.sh
+```
+
+The script will:
+
+- Configure repositories (Microsoft, Docker, Grafana, etc.)
+- Install developer tools and GNOME utilities
+- Handle common Docker setup issues automatically
+- Clean up the system
+
+---
+
+## 3. Script Reference
+
+```bash
+#!/usr/bin/env bash
+set -e
+
+EMAIL="haik.asatryan.95@gmail.com"
+CODENAME=$(lsb_release -cs)
+
+echo "🚀 Starting system setup for Ubuntu $CODENAME..."
+
+# Enable additional repositories and update
+sudo add-apt-repository universe -y
+sudo add-apt-repository multiverse -y
+sudo apt update && sudo apt upgrade -y
+sudo apt install -y apt-transport-https ca-certificates curl gnupg lsb-release software-properties-common unzip flatpak gnome-software-plugin-flatpak
+
+# Generate SSH key
+mkdir -p ~/.ssh
+if [ ! -f ~/.ssh/id_rsa ]; then
+  ssh-keygen -t rsa -b 4096 -C "$EMAIL" -f ~/.ssh/id_rsa -N ""
+fi
+chmod 700 ~/.ssh
+chmod 600 ~/.ssh/id_rsa
+chmod 644 ~/.ssh/id_rsa.pub
+
+# Microsoft repository for .NET SDK and VS Code
+wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor | sudo tee /usr/share/keyrings/microsoft.gpg > /dev/null
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/microsoft.gpg] https://packages.microsoft.com/repos/code stable main" | sudo tee /etc/apt/sources.list.d/vscode.list
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/microsoft.gpg] https://packages.microsoft.com/repos/microsoft-ubuntu-$CODENAME-prod $CODENAME main" | sudo tee /etc/apt/sources.list.d/microsoft.list
+
+# Docker repository
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker.gpg
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $CODENAME stable" | sudo tee /etc/apt/sources.list.d/docker.list
+
+# Grafana repo for k6
+curl -fsSL https://packages.grafana.com/gpg.key | sudo gpg --dearmor -o /usr/share/keyrings/grafana.gpg
+echo "deb [signed-by=/usr/share/keyrings/grafana.gpg] https://packages.grafana.com/oss/deb stable main" | sudo tee /etc/apt/sources.list.d/grafana.list
+
+sudo apt update
+
+# Install core packages
+sudo apt install -y   dotnet-sdk-9.0   code   docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin   wireguard openvpn   teams   anydesk teamviewer   gnome-tweaks gnome-shell-extension-manager gnome-shell-extensions   vlc filezilla   wine winetricks   k6
+
+# Install Google Chrome
+wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb -O /tmp/chrome.deb
+sudo apt install -y /tmp/chrome.deb || sudo apt --fix-broken install -y
+
+# Flatpak setup and installations
+flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+
+flatpak install -y flathub com.bitwarden.desktop
+flatpak install -y flathub org.telegram.desktop
+flatpak install -y flathub devtoys.app.DevToys
+flatpak install -y flathub qishibo.AnotherRedisDesktopManager
+
+# Docker Desktop
+wget -O /tmp/docker-desktop.deb "https://desktop.docker.com/linux/main/amd64/docker-desktop-latest.deb"
+sudo apt install -y /tmp/docker-desktop.deb || sudo apt --fix-broken install -y
+
+# --- Docker problem fixes ---
+# Fix permission and credentials issues (common)
+sudo usermod -aG docker $USER
+sudo systemctl enable docker --now
+if grep -q '"credsStore"' ~/.docker/config.json 2>/dev/null; then
+  sed -i '/"credsStore"/d' ~/.docker/config.json
+fi
+echo "export DOCKER_HOST=unix:///var/run/docker.sock" >> ~/.bashrc
+source ~/.bashrc
+
+# Post cleanup
+sudo apt autoremove -y && sudo apt clean
+
+echo "✅ Setup complete. Reboot recommended."
+```
+
+---
+
+## 4. Essential GNOME Customizations
+
+Install **Tweaks** and **Extension Manager** (done by script, but verify):
+
+```bash
+sudo apt install gnome-tweaks gnome-shell-extension-manager -y
+```
+
+Then open **Extension Manager** → Browse tab → search and install:
+
+| Extension                                        | Purpose                                          |
+| ------------------------------------------------ | ------------------------------------------------ |
+| **System Monitor**                               | Live CPU/RAM/network metrics                     |
+| **Top Bar Organizer**                            | Reorder top bar widgets                          |
+| **Dash to Dock**                                 | Enhanced dock behavior                           |
+| **Wiggle**                                       | Highlight cursor                                 |
+| **AppIndicator and KStatusNotifierItem Support** | Required for Docker Desktop and system tray apps |
+| **Blur My Shell**                                | Adds blur effect for aesthetics                  |
+| **Weather O’Clock**                              | Adds weather to top bar clock                    |
+| **Caffeine**                                     | Prevents auto-sleep                              |
+| **Coverflow Alt-Tab**                            | 3D window switcher                               |
+| **Clipboard Indicator / Pano**                   | Clipboard history management                     |
+| **Logo Menu**                                    | Replaces Activities with a clean menu            |
+| **Color Picker**                                 | Useful for UI/UX work                            |
+
+> ⚠️ Some extensions might not be updated immediately for GNOME 48.
+
+---
+
+## 5. Software Overview
+
+| Category         | Software                                                                                                                           | Source            |
+| ---------------- | ---------------------------------------------------------------------------------------------------------------------------------- | ----------------- |
+| Development      | .NET 9 SDK, VS Code, JetBrains Toolbox (manual), k6                                                                                | apt + manual      |
+| Containers       | Docker Engine, Docker Desktop, Lens                                                                                                | apt + vendor .deb |
+| Networking / VPN | WireGuard, OpenVPN                                                                                                                 | apt               |
+| Communication    | Teams, Telegram (Flatpak)                                                                                                          | apt + Flatpak     |
+| Utilities        | Chrome, AnyDesk, TeamViewer, Bitwarden (Flatpak), Another Redis Desktop Manager (Flatpak), DevToys (Flatpak), FileZilla, VLC, Wine | mixed             |
+| UI Customization | GNOME Tweaks, Shell Extensions                                                                                                     | apt               |
+
+---
+
+## 6. Sign-In Checklist
+
+After setup, sign in to the following for full functionality:
+
+| Application           | Purpose                                     |
+| --------------------- | ------------------------------------------- |
+| **VS Code**           | Sync settings, extensions, and GitHub login |
+| **Docker Desktop**    | Access Docker Hub & sync containers         |
+| **Microsoft Teams**   | Organization or personal communication      |
+| **Bitwarden**         | Password manager sync                       |
+| **Telegram**          | Messaging                                   |
+| **JetBrains Toolbox** | IDE updates and settings sync               |
+| **Google Chrome**     | Browser sync (extensions, bookmarks)        |
+
+---
+
+## 7. Final Steps
+
+- Reboot the system.
+- Launch Extension Manager and enable your preferred extensions.
+
+---
+
+**✅ Your Ubuntu developer environment is now fully set up and pre-tuned for daily use.**
