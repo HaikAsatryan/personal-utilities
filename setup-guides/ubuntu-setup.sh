@@ -1,72 +1,96 @@
 #!/usr/bin/env bash
 set -e
 
+# --- vars
 EMAIL="haik.asatryan.95@gmail.com"
+GIT_NAME="Haik Asatryan"
 CODENAME=$(lsb_release -cs)
-MS_CODENAME="noble"
+MS_CODENAME="noble"; [[ "$CODENAME" =~ ^(noble|jammy)$ ]] && MS_CODENAME="$CODENAME"
+export DEBIAN_FRONTEND=noninteractive
 
 echo "🚀 Starting system setup for Ubuntu $CODENAME..."
 
-# Enable additional repositories and update
+# --- base & updates
+sudo apt-get update
+sudo apt-get -y upgrade
+sudo apt-get install -y ca-certificates curl gnupg lsb-release software-properties-common unzip flatpak gnome-software-plugin-flatpak git
+sudo install -d -m 0755 /etc/apt/keyrings
 sudo add-apt-repository universe -y
 sudo add-apt-repository multiverse -y
-sudo apt update && sudo apt upgrade -y
-sudo apt install -y apt-transport-https ca-certificates curl gnupg lsb-release software-properties-common unzip flatpak gnome-software-plugin-flatpak
 
-# Generate SSH key
+# --- ssh key (ed25519) & git
 mkdir -p ~/.ssh
-if [ ! -f ~/.ssh/id_rsa ]; then
-  ssh-keygen -t rsa -b 4096 -C "$EMAIL" -f ~/.ssh/id_rsa -N ""
+if [ ! -f ~/.ssh/id_ed25519 ]; then
+  ssh-keygen -t ed25519 -C "$EMAIL" -f ~/.ssh/id_ed25519 -N ""
+  chmod 700 ~/.ssh && chmod 600 ~/.ssh/id_ed25519 && chmod 644 ~/.ssh/id_ed25519.pub
 fi
-chmod 700 ~/.ssh
-chmod 600 ~/.ssh/id_rsa
-chmod 644 ~/.ssh/id_rsa.pub
+git config --global user.email "${EMAIL}"
+git config --global user.name "${GIT_NAME}"
+git config --global init.defaultBranch main
 
-# Microsoft repository for .NET SDK and VS Code
-wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor | sudo tee /usr/share/keyrings/microsoft.gpg > /dev/null
-echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/microsoft.gpg] https://packages.microsoft.com/repos/code stable main" | sudo tee /etc/apt/sources.list.d/vscode.list
-echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/microsoft.gpg] https://packages.microsoft.com/repos/microsoft-ubuntu-$MS_CODENAME-prod $MS_CODENAME main" | sudo tee /etc/apt/sources.list.d/microsoft.list
+# --- repos: Microsoft (VS Code, .NET)
+curl -fsSL https://packages.microsoft.com/keys/microsoft.asc \
+ | gpg --dearmor | sudo tee /etc/apt/keyrings/microsoft.gpg >/dev/null
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/microsoft.gpg] https://packages.microsoft.com/repos/code stable main" \
+ | sudo tee /etc/apt/sources.list.d/vscode.list
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/microsoft.gpg] https://packages.microsoft.com/repos/microsoft-ubuntu-$MS_CODENAME-prod $MS_CODENAME main" \
+ | sudo tee /etc/apt/sources.list.d/microsoft.list
 
-# Docker repository
-curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker.gpg
-echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $CODENAME stable" | sudo tee /etc/apt/sources.list.d/docker.list
+# --- repos: Docker
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg \
+ | gpg --dearmor | sudo tee /etc/apt/keyrings/docker.gpg >/dev/null
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $CODENAME stable" \
+ | sudo tee /etc/apt/sources.list.d/docker.list
 
-# Grafana repo for k6
-curl -fsSL https://packages.grafana.com/gpg.key | sudo gpg --dearmor -o /usr/share/keyrings/grafana.gpg
-echo "deb [signed-by=/usr/share/keyrings/grafana.gpg] https://packages.grafana.com/oss/deb stable main" | sudo tee /etc/apt/sources.list.d/grafana.list
+# --- repos: k6
+curl -fsSL https://dl.k6.io/key.gpg \
+ | gpg --dearmor | sudo tee /etc/apt/keyrings/k6-archive-keyring.gpg >/dev/null
+echo "deb [signed-by=/etc/apt/keyrings/k6-archive-keyring.gpg] https://dl.k6.io/deb stable main" \
+ | sudo tee /etc/apt/sources.list.d/k6.list
 
-sudo apt update
+# --- repos: AnyDesk
+curl -fsSL https://keys.anydesk.com/repos/DEB-GPG-KEY \
+ | gpg --dearmor | sudo tee /etc/apt/keyrings/anydesk.gpg >/dev/null
+echo "deb [signed-by=/etc/apt/keyrings/anydesk.gpg] http://deb.anydesk.com/ all main" \
+ | sudo tee /etc/apt/sources.list.d/anydesk.list
 
-# Install core packages
-sudo apt install -y   dotnet-sdk-9.0   code   docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin   wireguard openvpn   teams   anydesk teamviewer   gnome-tweaks gnome-shell-extension-manager gnome-shell-extensions   vlc filezilla   wine winetricks   k6
+# --- refresh
+sudo apt-get update
 
-# Install Google Chrome
-wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb -O /tmp/chrome.deb
-sudo apt install -y /tmp/chrome.deb || sudo apt --fix-broken install -y
+# --- core packages
+sudo apt-get install -y \
+  dotnet-sdk-9.0 code \
+  docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin \
+  wireguard openvpn \
+  gnome-tweaks gnome-shell-extension-manager gnome-shell-extensions \
+  vlc filezilla wine winetricks \
+  k6 anydesk
 
-# Flatpak setup and installations
+# --- TeamViewer
+wget -qO /tmp/teamviewer.deb https://download.teamviewer.com/download/linux/teamviewer_amd64.deb
+sudo apt-get install -y /tmp/teamviewer.deb || sudo apt-get -f install -y
+
+# --- Google Chrome
+wget -qO /tmp/chrome.deb https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+sudo apt-get install -y /tmp/chrome.deb || sudo apt-get -f install -y
+
+# --- Flatpak apps
 flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+flatpak install -y flathub com.bitwarden.desktop org.telegram.desktop devtoys.app.DevToys qishibo.AnotherRedisDesktopManager
 
-flatpak install -y flathub com.bitwarden.desktop
-flatpak install -y flathub org.telegram.desktop
-flatpak install -y flathub devtoys.app.DevToys
-flatpak install -y flathub qishibo.AnotherRedisDesktopManager
+# --- Docker Desktop
+wget -qO /tmp/docker-desktop.deb https://desktop.docker.com/linux/main/amd64/docker-desktop-latest.deb
+sudo apt-get install -y /tmp/docker-desktop.deb || sudo apt-get -f install -y
 
-# Docker Desktop
-wget -O /tmp/docker-desktop.deb "https://desktop.docker.com/linux/main/amd64/docker-desktop-latest.deb"
-sudo apt install -y /tmp/docker-desktop.deb || sudo apt --fix-broken install -y
-
-# --- Docker problem fixes ---
-# Fix permission and credentials issues (common)
-sudo usermod -aG docker $USER
+# --- Docker post
+sudo usermod -aG docker "$USER"
 sudo systemctl enable docker --now
 if grep -q '"credsStore"' ~/.docker/config.json 2>/dev/null; then
   sed -i '/"credsStore"/d' ~/.docker/config.json
 fi
-echo "export DOCKER_HOST=unix:///var/run/docker.sock" >> ~/.bashrc
-source ~/.bashrc
 
-# Post cleanup
-sudo apt autoremove -y && sudo apt clean
+# --- cleanup
+sudo apt-get autoremove -y
+sudo apt-get clean
 
 echo "✅ Setup complete. Reboot recommended."
