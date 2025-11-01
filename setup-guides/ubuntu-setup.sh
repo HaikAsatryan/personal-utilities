@@ -20,7 +20,7 @@ echo "🚀 Starting system setup for Ubuntu $CODENAME..."
 
 # --- base
 sudo apt-get update
-sudo apt-get -y upgrade
+sudo apt-get -y -o Dpkg::Options::="--force-confnew" dist-upgrade
 sudo apt-get install -y ca-certificates curl gnupg lsb-release software-properties-common unzip flatpak gnome-software-plugin-flatpak git
 sudo install -d -m 0755 "$KEYRINGS"
 sudo add-apt-repository universe -y
@@ -112,13 +112,28 @@ if ! echo "${XDG_DATA_DIRS:-}" | grep -q "/var/lib/flatpak/exports/share"; then
   echo 'export XDG_DATA_DIRS="/var/lib/flatpak/exports/share:$HOME/.local/share/flatpak/exports/share:${XDG_DATA_DIRS:-/usr/local/share:/usr/share}"' \
   | sudo tee /etc/profile.d/flatpak-path.sh >/dev/null
 fi
+sudo apt-get install -y xdg-utils
 sudo update-desktop-database >/dev/null 2>&1 || true
+xdg-desktop-menu forceupdate >/dev/null 2>&1 || true
 
-# --- Lens (Kubernetes IDE via Snap)
+# --- Snap apps (similar structure to Flatpak)
 if ! command -v snap >/dev/null 2>&1; then
   sudo apt-get install -y snapd
+  sudo systemctl enable --now snapd.socket
+  sudo ln -s /var/lib/snapd/snap /snap 2>/dev/null || true
 fi
-sudo snap install kontena-lens --classic
+
+# install or refresh snaps
+sudo snap install kontena-lens --classic || sudo snap refresh kontena-lens --classic
+sudo snap install postman --classic || sudo snap refresh postman --classic
+
+# ensure Snap paths and menu integration
+if ! grep -q "/snap/bin" /etc/environment; then
+  echo 'PATH="$PATH:/snap/bin"' | sudo tee -a /etc/environment >/dev/null
+fi
+sudo snap refresh
+sudo update-desktop-database >/dev/null 2>&1 || true
+xdg-desktop-menu forceupdate >/dev/null 2>&1 || true
 
 # --- Docker Desktop (requires KVM)
 sudo apt-get install -y uidmap dbus-user-session qemu-system libvirt-daemon-system libvirt-clients bridge-utils
