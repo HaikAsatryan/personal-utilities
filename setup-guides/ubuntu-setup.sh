@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -e
+set -Eeuo pipefail
 
 # status + traps
 _ok=true
@@ -35,9 +35,8 @@ git config --global user.name "$GIT_NAME"
 git config --global init.defaultBranch main
 
 # --- repos (idempotent)
-sudo rm -f /etc/apt/sources.list.d/{vscode.list,microsoft.list,docker.list,k6.list,anydesk.list}
-sudo rm -f /usr/share/keyrings/{microsoft.gpg,docker.gpg,k6-archive-keyring.gpg,anydesk.gpg}
-
+sudo rm -f /etc/apt/sources.list.d/{vscode.list,microsoft.list}
+sudo rm -f /usr/share/keyrings/microsoft.gpg
 curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor | sudo tee "$KEYRINGS/microsoft.gpg" >/dev/null
 echo "deb [arch=$(dpkg --print-architecture) signed-by=$KEYRINGS/microsoft.gpg] https://packages.microsoft.com/repos/code stable main" | sudo tee /etc/apt/sources.list.d/vscode.list
 echo "deb [arch=$(dpkg --print-architecture) signed-by=$KEYRINGS/microsoft.gpg] https://packages.microsoft.com/repos/microsoft-ubuntu-$MS_CODENAME-prod $MS_CODENAME main" | sudo tee /etc/apt/sources.list.d/microsoft.list
@@ -62,20 +61,16 @@ sudo apt-get install -y \
   vlc filezilla wine winetricks \
   k6 anydesk
 
-# --- teamviewer (.deb)
+# --- teamviewer (.deb; non-fatal)
 if ! command -v teamviewer >/dev/null; then
   wget -qO /tmp/teamviewer.deb https://download.teamviewer.com/download/linux/teamviewer_amd64.deb
-  if ! sudo apt-get install -y /tmp/teamviewer.deb; then
-    sudo apt-get -f install -y || true
-  fi
+  if ! sudo apt-get install -y /tmp/teamviewer.deb; then sudo apt-get -f install -y || true; fi
 fi
 
-# --- chrome (.deb)
+# --- chrome (.deb; non-fatal)
 if ! command -v google-chrome >/dev/null; then
   wget -qO /tmp/chrome.deb https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-  if ! sudo apt-get install -y /tmp/chrome.deb; then
-    sudo apt-get -f install -y || true
-  fi
+  if ! sudo apt-get install -y /tmp/chrome.deb; then sudo apt-get -f install -y || true; fi
 fi
 
 # --- flatpak apps
@@ -85,17 +80,10 @@ flatpak install -y --or-update flathub \
   org.telegram.desktop \
   com.redis.RedisInsight
 
-# --- optional: ARDM via snap (no flathub)
-# if command -v snap >/dev/null; then
-#   snap list another-redis-desktop-manager >/dev/null 2>&1 || sudo snap install another-redis-desktop-manager
-# fi`
-
-# --- docker desktop (.deb)
+# --- docker desktop (.deb; non-fatal)
 if ! command -v docker-desktop >/dev/null; then
   wget -qO /tmp/docker-desktop.deb https://desktop.docker.com/linux/main/amd64/docker-desktop-latest.deb
-  if ! sudo apt-get install -y /tmp/docker-desktop.deb; then
-    sudo apt-get -f install -y || true
-  fi
+  if ! sudo apt-get install -y /tmp/docker-desktop.deb; then sudo apt-get -f install -y || true; fi
 fi
 
 # --- docker post
@@ -108,5 +96,3 @@ fi
 # --- cleanup
 sudo apt-get autoremove -y
 sudo apt-get clean
-
-echo "✅ Setup complete. Reboot recommended."
