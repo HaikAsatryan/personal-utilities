@@ -12,6 +12,8 @@ GIT_NAME="Haik Asatryan"
 CODENAME=$(lsb_release -cs)
 MS_CODENAME="noble"; [[ "$CODENAME" =~ ^(noble|jammy)$ ]] && MS_CODENAME="$CODENAME"
 KEYRINGS=/etc/apt/keyrings
+TARGET_USER=${SUDO_USER:-$USER}
+TARGET_HOME=$(getent passwd "$TARGET_USER" | cut -d: -f6)
 export DEBIAN_FRONTEND=noninteractive
 
 echo "🚀 Starting system setup for Ubuntu $CODENAME..."
@@ -24,15 +26,19 @@ sudo install -d -m 0755 "$KEYRINGS"
 sudo add-apt-repository universe -y
 sudo add-apt-repository multiverse -y
 
-# --- ssh + git
-mkdir -p ~/.ssh
-if [ ! -f ~/.ssh/id_ed25519 ]; then
-  ssh-keygen -t ed25519 -C "$EMAIL" -f ~/.ssh/id_ed25519 -N ""
-  chmod 700 ~/.ssh && chmod 600 ~/.ssh/id_ed25519 && chmod 644 ~/.ssh/id_ed25519.pub
+# --- ssh + git (user-scoped)
+sudo -u "$TARGET_USER" mkdir -p "$TARGET_HOME/.ssh"
+if [ ! -s "$TARGET_HOME/.ssh/id_ed25519" ]; then
+  sudo -u "$TARGET_USER" ssh-keygen -t ed25519 -C "$EMAIL" -f "$TARGET_HOME/.ssh/id_ed25519" -N "" -q
 fi
-git config --global user.email "$EMAIL"
-git config --global user.name "$GIT_NAME"
-git config --global init.defaultBranch main
+sudo chown -R "$TARGET_USER":"$TARGET_USER" "$TARGET_HOME/.ssh"
+sudo chmod 700 "$TARGET_HOME/.ssh"
+sudo chmod 600 "$TARGET_HOME/.ssh/id_ed25519" 2>/dev/null || true
+sudo chmod 644 "$TARGET_HOME/.ssh/id_ed25519.pub" 2>/dev/null || true
+
+sudo -u "$TARGET_USER" git config --global user.name  "$GIT_NAME"
+sudo -u "$TARGET_USER" git config --global user.email "$EMAIL"
+sudo -u "$TARGET_USER" git config --global init.defaultBranch main
 
 # --- repos (idempotent)
 
@@ -48,12 +54,9 @@ echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/micro
 echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/microsoft.gpg] https://packages.microsoft.com/repos/microsoft-ubuntu-$MS_CODENAME-prod $MS_CODENAME main" \
  | sudo tee /etc/apt/sources.list.d/microsoft-prod.list
 
+# remove any legacy duplicates
 sudo sed -i '/packages\.microsoft\.com\/repos\/code/d' /etc/apt/sources.list || true
 sudo rm -f /etc/apt/sources.list.d/vscode.sources /etc/apt/sources.list.d/code.sources /etc/apt/sources.list.d/*microsoft*.sources
-
-sudo rm -f /etc/apt/sources.list.d/*code*.list /etc/apt/sources.list.d/*microsoft*code*.list
-echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/microsoft.gpg] https://packages.microsoft.com/repos/code stable main" \
- | sudo tee /etc/apt/sources.list.d/vscode.list >/dev/null
 
 # Docker
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg \
@@ -73,6 +76,8 @@ curl -fsSL https://keys.anydesk.com/repos/DEB-GPG-KEY \
 echo "deb [signed-by=$KEYRINGS/anydesk.gpg] http://deb.anydesk.com/ all main" \
  | sudo tee /etc/apt/sources.list.d/anydesk.list
 
+# migrate *.list -> *.sources where applicable (safe on reruns)
+sudo apt -y modernize-sources || true
 sudo apt-get update
 
 # --- core packages
@@ -103,8 +108,22 @@ flatpak install -y --or-update flathub \
   org.telegram.desktop \
   com.redis.RedisInsight
 
-# --- Docker Desktop (official install)
-sudo apt-get install -y uidmap dbus-user-session
+# --- Docker Desktop (requires KVM)
+sudo apt-get install -y uidmap dbus-user-session qemu-system libvirt-daemon-system libvirt-clients bridge-utils
+sudo usermod -aG kvm,libvirt "$TARGET_USER"
+
+if lscpu | grep -qi intel; then
+  sudo modprobe kvm || true
+  sudo modprobe kvm_intel || true
+else
+  sudo modprobe kvm || true
+  sudo modprobe kvm_amd || true
+fi
+
+if [ ! -e /dev/kvm ]; then
+  echo "❌ Docker Desktop requires /dev/kvm. Enable VT-x/AMD-V or nested virtualization and rerun."
+  exit 1
+fi
 
 cd /tmp
 wget -q https://desktop.docker.com/linux/main/amd64/docker-desktop-amd64.deb
@@ -112,21 +131,17 @@ sudo apt-get update
 sudo apt-get install -y ./docker-desktop-amd64.deb
 
 # --- enable services (engine if present; desktop for the user)
-sudo usermod -aG docker "$USER"
-
-# enable docker engine only if the unit exists (you installed docker-ce earlier)
+sudo usermod -aG docker "$TARGET_USER"
 if systemctl list-unit-files | grep -q '^docker\.service'; then
   sudo systemctl enable --now docker
 fi
-
-# make user systemd run at boot and enable Docker Desktop as a user service
-loginctl enable-linger "$USER"
-runuser -l "$USER" -c 'systemctl --user enable docker-desktop.service || true'
-runuser -l "$USER" -c 'systemctl --user start  docker-desktop.service  || true'
+loginctl enable-linger "$TARGET_USER"
+runuser -l "$TARGET_USER" -c 'systemctl --user enable docker-desktop.service || true'
+runuser -l "$TARGET_USER" -c 'systemctl --user start  docker-desktop.service  || true'
 
 # optional: clear legacy credsStore if present
-if [ -f ~/.docker/config.json ] && grep -q '"credsStore"' ~/.docker/config.json 2>/dev/null; then
-  sed -i '/"credsStore"/d' ~/.docker/config.json
+if [ -f "$TARGET_HOME/.docker/config.json" ] && grep -q '"credsStore"' "$TARGET_HOME/.docker/config.json" 2>/dev/null; then
+  sed -i '/"credsStore"/d' "$TARGET_HOME/.docker/config.json"
 fi
 
 # --- cleanup
