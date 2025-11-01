@@ -84,7 +84,6 @@ sudo apt-get update
 sudo apt-get install -y \
   dotnet-sdk-9.0 code \
   docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin \
-  wireguard openvpn \
   gnome-tweaks gnome-shell-extension-manager gnome-shell-extensions \
   vlc filezilla wine winetricks \
   k6 anydesk
@@ -107,6 +106,19 @@ flatpak install -y --or-update flathub \
   com.bitwarden.desktop \
   org.telegram.desktop \
   com.redis.RedisInsight
+
+# --- flatpak menu export (ensure apps appear)
+if ! echo "${XDG_DATA_DIRS:-}" | grep -q "/var/lib/flatpak/exports/share"; then
+  echo 'export XDG_DATA_DIRS="/var/lib/flatpak/exports/share:$HOME/.local/share/flatpak/exports/share:${XDG_DATA_DIRS:-/usr/local/share:/usr/share}"' \
+  | sudo tee /etc/profile.d/flatpak-path.sh >/dev/null
+fi
+sudo update-desktop-database >/dev/null 2>&1 || true
+
+# --- Lens (Kubernetes IDE via Snap)
+if ! command -v snap >/dev/null 2>&1; then
+  sudo apt-get install -y snapd
+fi
+sudo snap install kontena-lens --classic
 
 # --- Docker Desktop (requires KVM)
 sudo apt-get install -y uidmap dbus-user-session qemu-system libvirt-daemon-system libvirt-clients bridge-utils

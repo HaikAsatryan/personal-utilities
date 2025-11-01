@@ -1,20 +1,20 @@
-# Comprehensive Linux Setup Guide for Ubuntu 25.04
+# Comprehensive Linux Setup Guide for Ubuntu 25.10
 
 ## Introduction
 
-This guide provides a full setup process for Ubuntu 25.04 (GNOME 48), automating developer tools, environment configuration, and GNOME customizations.
-It includes a one-time script (`ubuntu-setup.sh`) to install and configure everything with minimal manual steps.
+This guide provides a full setup process for Ubuntu 25.10 (GNOME 49), automating developer tools, environment configuration, and GNOME customizations.
+It includes a one-time (safe to rerun) script (`ubuntu-setup.sh`) to install and configure everything with minimal manual steps.
 
 ---
 
 ## 1. Clean Installation and Preparation
 
-Start with a clean installation of **Ubuntu 25.04 Desktop**.  
+Start with a clean installation of **Ubuntu 25.10 Desktop**.  
 During installation, connect to Wi-Fi and select **Minimal Installation** if you prefer a lean system.
 
 After the first boot:
 
-1. Complete system updates through **Settings → About → Check for Updates**.
+1. Complete system updates through **Software Update** application.
 2. Reboot once before proceeding.
 
 ---
@@ -25,9 +25,8 @@ After the first boot:
 
 Before running the script, open it and adjust:
 
-- Email address for SSH key generation.
+- Email address for SSH key generation and git.
 - Add or remove software you prefer.
-- Review Flatpak apps section.
 
 ### Run Script
 
@@ -35,11 +34,12 @@ Before running the script, open it and adjust:
 sudo chmod +x ubuntu-setup.sh
 sudo ./ubuntu-setup.sh
 ```
->Note: Script is located in the same directory where this guide is.
+
+> Note: Script is located in the same directory where this guide is.
 
 The script will:
 
-- Configure repositories (Microsoft, Docker, Grafana, etc.)
+- Configure repositories (Microsoft, Docker, etc.)
 - Install developer tools and GNOME utilities
 - Handle common Docker setup issues automatically
 - Clean up the system
@@ -48,13 +48,7 @@ The script will:
 
 ## 3. Essential GNOME Customizations
 
-Install **Tweaks** and **Extension Manager** (done by script, but verify):
-
-```bash
-sudo apt install gnome-tweaks gnome-shell-extension-manager -y
-```
-
-Then open **Extension Manager** → Browse tab → search and install:
+Open **Extension Manager** → Browse tab → search and install:
 
 | Extension                                        | Purpose                                          |
 | ------------------------------------------------ | ------------------------------------------------ |
@@ -71,20 +65,20 @@ Then open **Extension Manager** → Browse tab → search and install:
 | **Logo Menu**                                    | Replaces Activities with a clean menu            |
 | **Color Picker**                                 | Useful for UI/UX work                            |
 
-> ⚠️ Some extensions might not be updated immediately for GNOME 48.
+> ⚠️ Some extensions might not be updated immediately for your GNOME version.
 
 ---
 
 ## 4. Software Overview
 
-| Category         | Software                                                                                                                           | Source            |
-| ---------------- | ---------------------------------------------------------------------------------------------------------------------------------- | ----------------- |
-| Development      | .NET 9 SDK, VS Code, JetBrains Toolbox (manual), k6                                                                                | apt + manual      |
-| Containers       | Docker Engine, Docker Desktop, Lens                                                                                                | apt + vendor .deb |
-| Networking / VPN | WireGuard, OpenVPN                                                                                                                 | apt               |
-| Communication    | Teams, Telegram (Flatpak)                                                                                                          | apt + Flatpak     |
-| Utilities        | Chrome, AnyDesk, TeamViewer, Bitwarden (Flatpak), Another Redis Desktop Manager (Flatpak), DevToys (Flatpak), FileZilla, VLC, Wine | mixed             |
-| UI Customization | GNOME Tweaks, Shell Extensions                                                                                                     | apt               |
+| Category         | Software                                                                                        | Source            |
+| ---------------- | ----------------------------------------------------------------------------------------------- | ----------------- |
+| Development      | .NET 9 SDK, VS Code, JetBrains Toolbox (manual), k6                                             | apt + manual      |
+| Containers       | Docker Engine, Docker Desktop, Lens                                                             | apt + vendor .deb |
+| Networking / VPN | WireGuard, OpenVPN                                                                              | apt               |
+| Communication    | Telegram (Flatpak)                                                                              | apt + Flatpak     |
+| Utilities        | Chrome, AnyDesk, TeamViewer, Bitwarden (Flatpak), Redis Insight (Flatpak), FileZilla, VLC, Wine | mixed             |
+| UI Customization | GNOME Tweaks, Shell Extensions                                                                  | apt               |
 
 ---
 
