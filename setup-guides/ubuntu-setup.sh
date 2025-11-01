@@ -11,9 +11,10 @@ EMAIL="haik.asatryan.95@gmail.com"
 GIT_NAME="Haik Asatryan"
 CODENAME=$(lsb_release -cs)
 MS_CODENAME="noble"; [[ "$CODENAME" =~ ^(noble|jammy)$ ]] && MS_CODENAME="$CODENAME"
-KEYRINGS=/etc/apt/keyrings
 
 # --- cleanup old keys + repos
+KEYRINGS=/etc/apt/keyrings
+sudo install -d -m 0755 "$KEYRINGS"
 sudo rm -f /etc/apt/sources.list.d/vscode.list /etc/apt/sources.list.d/microsoft.list
 sudo rm -f /usr/share/keyrings/microsoft.gpg
 
@@ -25,7 +26,6 @@ echo "🚀 Starting system setup for Ubuntu $CODENAME..."
 sudo apt-get update
 sudo apt-get -y upgrade
 sudo apt-get install -y ca-certificates curl gnupg lsb-release software-properties-common unzip flatpak gnome-software-plugin-flatpak git
-sudo install -d -m 0755 "$KEYRINGS"
 sudo add-apt-repository universe -y
 sudo add-apt-repository multiverse -y
 
