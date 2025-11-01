@@ -96,20 +96,29 @@ flatpak install -y --or-update flathub \
   org.telegram.desktop \
   com.redis.RedisInsight
 
-# --- deps for rootless/user services
+# --- Docker Desktop (official install)
 sudo apt-get install -y uidmap dbus-user-session
 
-# --- Docker Desktop (official)
 cd /tmp
 wget -q https://desktop.docker.com/linux/main/amd64/docker-desktop-amd64.deb
 sudo apt-get update
 sudo apt-get install -y ./docker-desktop-amd64.deb
-systemctl --user enable --now docker-desktop || true
 
-# --- docker post
+# --- enable services (engine if present; desktop for the user)
 sudo usermod -aG docker "$USER"
-sudo systemctl enable docker --now
-if grep -q '"credsStore"' ~/.docker/config.json 2>/dev/null; then
+
+# enable docker engine only if the unit exists (you installed docker-ce earlier)
+if systemctl list-unit-files | grep -q '^docker\.service'; then
+  sudo systemctl enable --now docker
+fi
+
+# make user systemd run at boot and enable Docker Desktop as a user service
+loginctl enable-linger "$USER"
+runuser -l "$USER" -c 'systemctl --user enable docker-desktop.service || true'
+runuser -l "$USER" -c 'systemctl --user start  docker-desktop.service  || true'
+
+# optional: clear legacy credsStore if present
+if [ -f ~/.docker/config.json ] && grep -q '"credsStore"' ~/.docker/config.json 2>/dev/null; then
   sed -i '/"credsStore"/d' ~/.docker/config.json
 fi
 
