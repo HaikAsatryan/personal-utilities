@@ -96,11 +96,15 @@ flatpak install -y --or-update flathub \
   org.telegram.desktop \
   com.redis.RedisInsight
 
-# --- docker desktop (.deb; non-fatal)
-if ! command -v docker-desktop >/dev/null; then
-  wget -qO /tmp/docker-desktop.deb https://desktop.docker.com/linux/main/amd64/docker-desktop-latest.deb
-  if ! sudo apt-get install -y /tmp/docker-desktop.deb; then sudo apt-get -f install -y || true; fi
-fi
+# --- deps for rootless/user services
+sudo apt-get install -y uidmap dbus-user-session
+
+# --- Docker Desktop (official)
+cd /tmp
+wget -q https://desktop.docker.com/linux/main/amd64/docker-desktop-amd64.deb
+sudo apt-get update
+sudo apt-get install -y ./docker-desktop-amd64.deb
+systemctl --user enable --now docker-desktop || true
 
 # --- docker post
 sudo usermod -aG docker "$USER"
