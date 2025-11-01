@@ -48,6 +48,13 @@ echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/micro
 echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/microsoft.gpg] https://packages.microsoft.com/repos/microsoft-ubuntu-$MS_CODENAME-prod $MS_CODENAME main" \
  | sudo tee /etc/apt/sources.list.d/microsoft-prod.list
 
+sudo sed -i '/packages\.microsoft\.com\/repos\/code/d' /etc/apt/sources.list || true
+sudo rm -f /etc/apt/sources.list.d/vscode.sources /etc/apt/sources.list.d/code.sources /etc/apt/sources.list.d/*microsoft*.sources
+
+sudo rm -f /etc/apt/sources.list.d/*code*.list /etc/apt/sources.list.d/*microsoft*code*.list
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/microsoft.gpg] https://packages.microsoft.com/repos/code stable main" \
+ | sudo tee /etc/apt/sources.list.d/vscode.list >/dev/null
+
 # Docker
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg \
  | gpg --dearmor | sudo tee "$KEYRINGS/docker.gpg" >/dev/null
