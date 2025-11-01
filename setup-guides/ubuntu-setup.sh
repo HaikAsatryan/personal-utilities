@@ -6,55 +6,46 @@ EMAIL="haik.asatryan.95@gmail.com"
 GIT_NAME="Haik Asatryan"
 CODENAME=$(lsb_release -cs)
 MS_CODENAME="noble"; [[ "$CODENAME" =~ ^(noble|jammy)$ ]] && MS_CODENAME="$CODENAME"
+KEYRINGS=/etc/apt/keyrings
 export DEBIAN_FRONTEND=noninteractive
 
 echo "🚀 Starting system setup for Ubuntu $CODENAME..."
 
-# --- base & updates
+# --- base
 sudo apt-get update
 sudo apt-get -y upgrade
 sudo apt-get install -y ca-certificates curl gnupg lsb-release software-properties-common unzip flatpak gnome-software-plugin-flatpak git
-sudo install -d -m 0755 /etc/apt/keyrings
+sudo install -d -m 0755 "$KEYRINGS"
 sudo add-apt-repository universe -y
 sudo add-apt-repository multiverse -y
 
-# --- ssh key (ed25519) & git
+# --- ssh + git
 mkdir -p ~/.ssh
 if [ ! -f ~/.ssh/id_ed25519 ]; then
   ssh-keygen -t ed25519 -C "$EMAIL" -f ~/.ssh/id_ed25519 -N ""
   chmod 700 ~/.ssh && chmod 600 ~/.ssh/id_ed25519 && chmod 644 ~/.ssh/id_ed25519.pub
 fi
-git config --global user.email "${EMAIL}"
-git config --global user.name "${GIT_NAME}"
+git config --global user.email "$EMAIL"
+git config --global user.name "$GIT_NAME"
 git config --global init.defaultBranch main
 
-# --- repos: Microsoft (VS Code, .NET)
-curl -fsSL https://packages.microsoft.com/keys/microsoft.asc \
- | gpg --dearmor | sudo tee /etc/apt/keyrings/microsoft.gpg >/dev/null
-echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/microsoft.gpg] https://packages.microsoft.com/repos/code stable main" \
- | sudo tee /etc/apt/sources.list.d/vscode.list
-echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/microsoft.gpg] https://packages.microsoft.com/repos/microsoft-ubuntu-$MS_CODENAME-prod $MS_CODENAME main" \
- | sudo tee /etc/apt/sources.list.d/microsoft.list
+# --- repos (idempotent)
+sudo rm -f /etc/apt/sources.list.d/{vscode.list,microsoft.list,docker.list,k6.list,anydesk.list}
+sudo rm -f /usr/share/keyrings/{microsoft.gpg,docker.gpg,k6-archive-keyring.gpg,anydesk.gpg}
 
-# --- repos: Docker
-curl -fsSL https://download.docker.com/linux/ubuntu/gpg \
- | gpg --dearmor | sudo tee /etc/apt/keyrings/docker.gpg >/dev/null
-echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $CODENAME stable" \
- | sudo tee /etc/apt/sources.list.d/docker.list
+curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor | sudo tee "$KEYRINGS/microsoft.gpg" >/dev/null
+echo "deb [arch=$(dpkg --print-architecture) signed-by=$KEYRINGS/microsoft.gpg] https://packages.microsoft.com/repos/code stable main" | sudo tee /etc/apt/sources.list.d/vscode.list
+echo "deb [arch=$(dpkg --print-architecture) signed-by=$KEYRINGS/microsoft.gpg] https://packages.microsoft.com/repos/microsoft-ubuntu-$MS_CODENAME-prod $MS_CODENAME main" | sudo tee /etc/apt/sources.list.d/microsoft.list
 
-# --- repos: k6
-curl -fsSL https://dl.k6.io/key.gpg \
- | gpg --dearmor | sudo tee /etc/apt/keyrings/k6-archive-keyring.gpg >/dev/null
-echo "deb [signed-by=/etc/apt/keyrings/k6-archive-keyring.gpg] https://dl.k6.io/deb stable main" \
- | sudo tee /etc/apt/sources.list.d/k6.list
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor | sudo tee "$KEYRINGS/docker.gpg" >/dev/null
+echo "deb [arch=$(dpkg --print-architecture) signed-by=$KEYRINGS/docker.gpg] https://download.docker.com/linux/ubuntu $CODENAME stable" | sudo tee /etc/apt/sources.list.d/docker.list
 
-# --- repos: AnyDesk
-curl -fsSL https://keys.anydesk.com/repos/DEB-GPG-KEY \
- | gpg --dearmor | sudo tee /etc/apt/keyrings/anydesk.gpg >/dev/null
-echo "deb [signed-by=/etc/apt/keyrings/anydesk.gpg] http://deb.anydesk.com/ all main" \
- | sudo tee /etc/apt/sources.list.d/anydesk.list
+curl -fsSL https://dl.k6.io/key.gpg | gpg --dearmor | sudo tee "$KEYRINGS/k6-archive-keyring.gpg" >/dev/null
+echo "deb [signed-by=$KEYRINGS/k6-archive-keyring.gpg] https://dl.k6.io/deb stable main" | sudo tee /etc/apt/sources.list.d/k6.list
 
-# --- refresh
+curl -fsSL https://keys.anydesk.com/repos/DEB-GPG-KEY | gpg --dearmor | sudo tee "$KEYRINGS/anydesk.gpg" >/dev/null
+echo "deb [signed-by=$KEYRINGS/anydesk.gpg] http://deb.anydesk.com/ all main" | sudo tee /etc/apt/sources.list.d/anydesk.list
+
 sudo apt-get update
 
 # --- core packages
@@ -66,23 +57,37 @@ sudo apt-get install -y \
   vlc filezilla wine winetricks \
   k6 anydesk
 
-# --- TeamViewer
-wget -qO /tmp/teamviewer.deb https://download.teamviewer.com/download/linux/teamviewer_amd64.deb
-sudo apt-get install -y /tmp/teamviewer.deb || sudo apt-get -f install -y
+# --- teamviewer (.deb)
+command -v teamviewer >/dev/null || {
+  wget -qO /tmp/teamviewer.deb https://download.teamviewer.com/download/linux/teamviewer_amd64.deb
+  sudo apt-get install -y /tmp/teamviewer.deb || sudo apt-get -f install -y
+}
 
-# --- Google Chrome
-wget -qO /tmp/chrome.deb https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-sudo apt-get install -y /tmp/chrome.deb || sudo apt-get -f install -y
+# --- chrome (.deb)
+command -v google-chrome >/dev/null || {
+  wget -qO /tmp/chrome.deb https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+  sudo apt-get install -y /tmp/chrome.deb || sudo apt-get -f install -y
+}
 
-# --- Flatpak apps
+# --- flatpak apps
 flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
-flatpak install -y flathub com.bitwarden.desktop org.telegram.desktop  qishibo.AnotherRedisDesktopManager
+flatpak install -y --or-update flathub \
+  com.bitwarden.desktop \
+  org.telegram.desktop \
+  com.redis.RedisInsight
 
-# --- Docker Desktop
-wget -qO /tmp/docker-desktop.deb https://desktop.docker.com/linux/main/amd64/docker-desktop-latest.deb
-sudo apt-get install -y /tmp/docker-desktop.deb || sudo apt-get -f install -y
+# --- optional: ARDM via snap (no flathub)
+# if command -v snap >/dev/null; then
+#   snap list another-redis-desktop-manager >/dev/null 2>&1 || sudo snap install another-redis-desktop-manager
+# fi`
 
-# --- Docker post
+# --- docker desktop (.deb)
+command -v docker-desktop >/dev/null || {
+  wget -qO /tmp/docker-desktop.deb https://desktop.docker.com/linux/main/amd64/docker-desktop-latest.deb
+  sudo apt-get install -y /tmp/docker-desktop.deb || sudo apt-get -f install -y
+}
+
+# --- docker post
 sudo usermod -aG docker "$USER"
 sudo systemctl enable docker --now
 if grep -q '"credsStore"' ~/.docker/config.json 2>/dev/null; then
