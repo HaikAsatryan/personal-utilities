@@ -12,6 +12,11 @@ GIT_NAME="Haik Asatryan"
 CODENAME=$(lsb_release -cs)
 MS_CODENAME="noble"; [[ "$CODENAME" =~ ^(noble|jammy)$ ]] && MS_CODENAME="$CODENAME"
 KEYRINGS=/etc/apt/keyrings
+
+# --- cleanup old keys + repos
+sudo rm -f /etc/apt/sources.list.d/vscode.list /etc/apt/sources.list.d/microsoft.list
+sudo rm -f /usr/share/keyrings/microsoft.gpg
+
 export DEBIAN_FRONTEND=noninteractive
 
 echo "🚀 Starting system setup for Ubuntu $CODENAME..."
@@ -35,8 +40,7 @@ git config --global user.name "$GIT_NAME"
 git config --global init.defaultBranch main
 
 # --- repos (idempotent)
-sudo rm -f /etc/apt/sources.list.d/{vscode.list,microsoft.list}
-sudo rm -f /usr/share/keyrings/microsoft.gpg
+
 curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor | sudo tee "$KEYRINGS/microsoft.gpg" >/dev/null
 echo "deb [arch=$(dpkg --print-architecture) signed-by=$KEYRINGS/microsoft.gpg] https://packages.microsoft.com/repos/code stable main" | sudo tee /etc/apt/sources.list.d/vscode.list
 echo "deb [arch=$(dpkg --print-architecture) signed-by=$KEYRINGS/microsoft.gpg] https://packages.microsoft.com/repos/microsoft-ubuntu-$MS_CODENAME-prod $MS_CODENAME main" | sudo tee /etc/apt/sources.list.d/microsoft.list
