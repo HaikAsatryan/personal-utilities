@@ -11,13 +11,7 @@ EMAIL="haik.asatryan.95@gmail.com"
 GIT_NAME="Haik Asatryan"
 CODENAME=$(lsb_release -cs)
 MS_CODENAME="noble"; [[ "$CODENAME" =~ ^(noble|jammy)$ ]] && MS_CODENAME="$CODENAME"
-
-# --- cleanup old keys + repos
 KEYRINGS=/etc/apt/keyrings
-sudo install -d -m 0755 "$KEYRINGS"
-sudo rm -f /etc/apt/sources.list.d/vscode.list /etc/apt/sources.list.d/microsoft.list
-sudo rm -f /usr/share/keyrings/microsoft.gpg
-
 export DEBIAN_FRONTEND=noninteractive
 
 echo "🚀 Starting system setup for Ubuntu $CODENAME..."
@@ -26,6 +20,7 @@ echo "🚀 Starting system setup for Ubuntu $CODENAME..."
 sudo apt-get update
 sudo apt-get -y upgrade
 sudo apt-get install -y ca-certificates curl gnupg lsb-release software-properties-common unzip flatpak gnome-software-plugin-flatpak git
+sudo install -d -m 0755 "$KEYRINGS"
 sudo add-apt-repository universe -y
 sudo add-apt-repository multiverse -y
 
@@ -41,18 +36,35 @@ git config --global init.defaultBranch main
 
 # --- repos (idempotent)
 
-curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor | sudo tee "$KEYRINGS/microsoft.gpg" >/dev/null
-echo "deb [arch=$(dpkg --print-architecture) signed-by=$KEYRINGS/microsoft.gpg] https://packages.microsoft.com/repos/code stable main" | sudo tee /etc/apt/sources.list.d/vscode.list
-echo "deb [arch=$(dpkg --print-architecture) signed-by=$KEYRINGS/microsoft.gpg] https://packages.microsoft.com/repos/microsoft-ubuntu-$MS_CODENAME-prod $MS_CODENAME main" | sudo tee /etc/apt/sources.list.d/microsoft.list
+# Microsoft: hard reset to a single keyring path (/usr/share/keyrings)
+sudo find /etc/apt/sources.list.d -maxdepth 1 -type f \
+  \( -iname '*code*.list' -o -iname '*microsoft*.list' -o -iname '*microsoft*.sources' \) -print -delete || true
+sudo rm -f /etc/apt/keyrings/microsoft.gpg /usr/share/keyrings/microsoft.gpg
 
-curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor | sudo tee "$KEYRINGS/docker.gpg" >/dev/null
-echo "deb [arch=$(dpkg --print-architecture) signed-by=$KEYRINGS/docker.gpg] https://download.docker.com/linux/ubuntu $CODENAME stable" | sudo tee /etc/apt/sources.list.d/docker.list
+curl -fsSL https://packages.microsoft.com/keys/microsoft.asc \
+ | gpg --dearmor | sudo tee /usr/share/keyrings/microsoft.gpg >/dev/null
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/microsoft.gpg] https://packages.microsoft.com/repos/code stable main" \
+ | sudo tee /etc/apt/sources.list.d/vscode.list
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/microsoft.gpg] https://packages.microsoft.com/repos/microsoft-ubuntu-$MS_CODENAME-prod $MS_CODENAME main" \
+ | sudo tee /etc/apt/sources.list.d/microsoft-prod.list
 
-curl -fsSL https://dl.k6.io/key.gpg | gpg --dearmor | sudo tee "$KEYRINGS/k6-archive-keyring.gpg" >/dev/null
-echo "deb [signed-by=$KEYRINGS/k6-archive-keyring.gpg] https://dl.k6.io/deb stable main" | sudo tee /etc/apt/sources.list.d/k6.list
+# Docker
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg \
+ | gpg --dearmor | sudo tee "$KEYRINGS/docker.gpg" >/dev/null
+echo "deb [arch=$(dpkg --print-architecture) signed-by=$KEYRINGS/docker.gpg] https://download.docker.com/linux/ubuntu $CODENAME stable" \
+ | sudo tee /etc/apt/sources.list.d/docker.list
 
-curl -fsSL https://keys.anydesk.com/repos/DEB-GPG-KEY | gpg --dearmor | sudo tee "$KEYRINGS/anydesk.gpg" >/dev/null
-echo "deb [signed-by=$KEYRINGS/anydesk.gpg] http://deb.anydesk.com/ all main" | sudo tee /etc/apt/sources.list.d/anydesk.list
+# k6
+curl -fsSL https://dl.k6.io/key.gpg \
+ | gpg --dearmor | sudo tee "$KEYRINGS/k6-archive-keyring.gpg" >/dev/null
+echo "deb [signed-by=$KEYRINGS/k6-archive-keyring.gpg] https://dl.k6.io/deb stable main" \
+ | sudo tee /etc/apt/sources.list.d/k6.list
+
+# AnyDesk
+curl -fsSL https://keys.anydesk.com/repos/DEB-GPG-KEY \
+ | gpg --dearmor | sudo tee "$KEYRINGS/anydesk.gpg" >/dev/null
+echo "deb [signed-by=$KEYRINGS/anydesk.gpg] http://deb.anydesk.com/ all main" \
+ | sudo tee /etc/apt/sources.list.d/anydesk.list
 
 sudo apt-get update
 
