@@ -1,6 +1,11 @@
 #!/usr/bin/env bash
 set -e
 
+# status + traps
+_ok=true
+trap '_ok=false; echo "❌ Setup failed at line $LINENO"; exit 1' ERR
+trap '$_ok && echo "✅ Setup complete. Reboot recommended."' EXIT
+
 # --- vars
 EMAIL="haik.asatryan.95@gmail.com"
 GIT_NAME="Haik Asatryan"
@@ -58,16 +63,20 @@ sudo apt-get install -y \
   k6 anydesk
 
 # --- teamviewer (.deb)
-command -v teamviewer >/dev/null || {
+if ! command -v teamviewer >/dev/null; then
   wget -qO /tmp/teamviewer.deb https://download.teamviewer.com/download/linux/teamviewer_amd64.deb
-  sudo apt-get install -y /tmp/teamviewer.deb || sudo apt-get -f install -y
-}
+  if ! sudo apt-get install -y /tmp/teamviewer.deb; then
+    sudo apt-get -f install -y || true
+  fi
+fi
 
 # --- chrome (.deb)
-command -v google-chrome >/dev/null || {
+if ! command -v google-chrome >/dev/null; then
   wget -qO /tmp/chrome.deb https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-  sudo apt-get install -y /tmp/chrome.deb || sudo apt-get -f install -y
-}
+  if ! sudo apt-get install -y /tmp/chrome.deb; then
+    sudo apt-get -f install -y || true
+  fi
+fi
 
 # --- flatpak apps
 flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
@@ -82,10 +91,12 @@ flatpak install -y --or-update flathub \
 # fi`
 
 # --- docker desktop (.deb)
-command -v docker-desktop >/dev/null || {
+if ! command -v docker-desktop >/dev/null; then
   wget -qO /tmp/docker-desktop.deb https://desktop.docker.com/linux/main/amd64/docker-desktop-latest.deb
-  sudo apt-get install -y /tmp/docker-desktop.deb || sudo apt-get -f install -y
-}
+  if ! sudo apt-get install -y /tmp/docker-desktop.deb; then
+    sudo apt-get -f install -y || true
+  fi
+fi
 
 # --- docker post
 sudo usermod -aG docker "$USER"
