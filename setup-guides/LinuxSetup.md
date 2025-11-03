@@ -66,6 +66,10 @@ Open **Extension Manager** → Browse tab → search and install:
 | **Color Picker**                                 | Useful for UI/UX work                            |
 
 > ⚠️ Some extensions might not be updated immediately for your GNOME version.
+Add to Desktop
+WireGuard Indicator
+Vitals (sys monitor alt)
+Lock Keys
 
 ---
 
