@@ -75,8 +75,8 @@ winget install -e --id PostgreSQL.pgAdmin
 winget install -e --id Ookla.Speedtest.Desktop
 winget install -e --id WireGuard.WireGuard
 winget install -e --id Mirantis.Lens
+winget install -e --id Microsoft.DotNet.SDK.10
 winget install -e --id Microsoft.DotNet.SDK.9
-winget install -e --id Microsoft.DotNet.SDK.8
 winget install -e --id Notepad++.Notepad++
 winget install -e --id Microsoft.VisualStudioCode --scope machine
 winget install -e --id Git.Git
@@ -87,7 +87,7 @@ winget install -e --id Telegram.TelegramDesktop
 winget install -e --id Microsoft.Teams
 winget install -e --id AnyDeskSoftwareGmbH.AnyDesk
 winget install -e --id TeamViewer.TeamViewer
-winget install -e --id qishibo.AnotherRedisDesktopManager
+winget install -e --id RedisInsight.RedisInsight
 winget install -e --id RustDesk.RustDesk  
 winget install -e --id WinSCP.WinSCP
 winget install -e --id DevToys-app.DevToys
