@@ -69,6 +69,7 @@ This tool helps streamline the installation and maintenance of software, ensurin
 The following applications can typically be found in the `winget` repository. Use the `winget install` command with the appropriate ID:
 
 ```pwsh
+winget install -e --id Microsoft.PowerShell
 winget install -e --id Microsoft.PowerToys
 winget install -e --id Google.GoogleDrive
 winget install -e --id PostgreSQL.pgAdmin
