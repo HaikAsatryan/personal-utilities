@@ -96,7 +96,7 @@ winget install -e --id AltSnap.AltSnap
 winget install -e --id JetBrains.Toolbox
 winget install -e --id Docker.DockerDesktop
 winget install -e --id OpenVPNTechnologies.OpenVPN
-winget install -e --id k6.k6
+winget install -e --id GrafanaLabs.k6
 ```
 
 ### Applications to Check Manually
