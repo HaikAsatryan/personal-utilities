@@ -1,15 +1,15 @@
-# Comprehensive Linux Setup Guide for Ubuntu 25.10
+# Comprehensive Linux Setup Guide for Ubuntu 22+ LTS versions
 
 ## Introduction
 
-This guide provides a full setup process for Ubuntu 25.10 (GNOME 49), automating developer tools, environment configuration, and GNOME customizations.
+This guide provides a full setup process for Ubuntu 22+ LTS, automating developer tools, environment configuration, and GNOME customizations.
 It includes a one-time (safe to rerun) script (`ubuntu-setup.sh`) to install and configure everything with minimal manual steps.
 
 ---
 
 ## 1. Clean Installation and Preparation
 
-Start with a clean installation of **Ubuntu 25.10 Desktop**.  
+Start with a clean installation of **Ubuntu 24.04 Desktop**.  
 During installation, connect to Wi-Fi and select **Minimal Installation** if you prefer a lean system.
 
 After the first boot:

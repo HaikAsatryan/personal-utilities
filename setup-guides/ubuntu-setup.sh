@@ -10,7 +10,19 @@ trap '$_ok && echo "✅ Setup complete. Reboot recommended."' EXIT
 EMAIL="haik.asatryan.95@gmail.com"
 GIT_NAME="Haik Asatryan"
 CODENAME=$(lsb_release -cs)
-MS_CODENAME="noble"; [[ "$CODENAME" =~ ^(noble|jammy)$ ]] && MS_CODENAME="$CODENAME"
+DISTRO_ID=$(lsb_release -is)
+
+# Support only Ubuntu LTS 22.04 (jammy) and 24.04 (noble)
+if [[ "$DISTRO_ID" != "Ubuntu" ]]; then
+  echo "❌ This script is intended for Ubuntu LTS only (22.04/24.04)."
+  exit 1
+fi
+
+if [[ ! "$CODENAME" =~ ^(jammy|noble)$ ]]; then
+  echo "❌ Unsupported Ubuntu release: $CODENAME. Use 22.04 (jammy) or 24.04 (noble)."
+  exit 1
+fi
+
 KEYRINGS=/etc/apt/keyrings
 TARGET_USER=${SUDO_USER:-$USER}
 TARGET_HOME=$(getent passwd "$TARGET_USER" | cut -d: -f6)
@@ -42,21 +54,27 @@ sudo -u "$TARGET_USER" git config --global init.defaultBranch main
 
 # --- repos (idempotent)
 
-# Microsoft: hard reset to a single keyring path (/usr/share/keyrings)
+# --- repos (idempotent)
+
+# Microsoft: VS Code repo only (.NET comes from Ubuntu / backports)
 sudo find /etc/apt/sources.list.d -maxdepth 1 -type f \
   \( -iname '*code*.list' -o -iname '*microsoft*.list' -o -iname '*microsoft*.sources' \) -print -delete || true
 sudo rm -f /etc/apt/keyrings/microsoft.gpg /usr/share/keyrings/microsoft.gpg
 
 curl -fsSL https://packages.microsoft.com/keys/microsoft.asc \
- | gpg --dearmor | sudo tee /usr/share/keyrings/microsoft.gpg >/dev/null
-echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/microsoft.gpg] https://packages.microsoft.com/repos/code stable main" \
- | sudo tee /etc/apt/sources.list.d/vscode.list
-echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/microsoft.gpg] https://packages.microsoft.com/repos/microsoft-ubuntu-$MS_CODENAME-prod $MS_CODENAME main" \
- | sudo tee /etc/apt/sources.list.d/microsoft-prod.list
+  | gpg --dearmor | sudo tee /usr/share/keyrings/microsoft.gpg >/dev/null
 
-# remove any legacy duplicates
-sudo sed -i '/packages\.microsoft\.com\/repos\/code/d' /etc/apt/sources.list || true
-sudo rm -f /etc/apt/sources.list.d/vscode.sources /etc/apt/sources.list.d/code.sources /etc/apt/sources.list.d/*microsoft*.sources
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/microsoft.gpg] \
+ https://packages.microsoft.com/repos/code stable main" \
+ | sudo tee /etc/apt/sources.list.d/vscode.list
+
+# Clean up legacy ms prod feeds; 24.04+ ships .NET from Canonical instead
+sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list
+sudo sed -i '/packages\.microsoft\.com\/ubuntu\/[0-9]\{2\}\.[0-9]\{2\}\/prod/d' /etc/apt/sources.list || true
+
+
+sudo add-apt-repository -y ppa:dotnet/backports
+
 
 # Docker
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg \
@@ -82,7 +100,9 @@ sudo apt-get update
 
 # --- core packages
 sudo apt-get install -y \
-  dotnet-sdk-9.0 code \
+  dotnet-sdk-9.0 \
+  dotnet-sdk-10.0 \
+  code \
   docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin \
   gnome-tweaks gnome-shell-extension-manager gnome-shell-extensions \
   vlc filezilla wine winetricks \
