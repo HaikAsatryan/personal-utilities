@@ -33,7 +33,7 @@ _After making these changes, restart your computer to ensure all settings are ap
 ### Generate SSH Key
 
 ```pwsh
-ssh-keygen -b 4096 -t rsa -C "dell-xps-15"
+ssh-keygen -t ed25519 -C "haik-pc"
 ```
 
 ## Applications Installation
@@ -69,14 +69,15 @@ This tool helps streamline the installation and maintenance of software, ensurin
 The following applications can typically be found in the `winget` repository. Use the `winget install` command with the appropriate ID:
 
 ```pwsh
+winget install -e --id Microsoft.PowerShell
 winget install -e --id Microsoft.PowerToys
 winget install -e --id Google.GoogleDrive
 winget install -e --id PostgreSQL.pgAdmin
 winget install -e --id Ookla.Speedtest.Desktop
 winget install -e --id WireGuard.WireGuard
 winget install -e --id Mirantis.Lens
+winget install -e --id Microsoft.DotNet.SDK.10
 winget install -e --id Microsoft.DotNet.SDK.9
-winget install -e --id Microsoft.DotNet.SDK.8
 winget install -e --id Notepad++.Notepad++
 winget install -e --id Microsoft.VisualStudioCode --scope machine
 winget install -e --id Git.Git
@@ -87,7 +88,7 @@ winget install -e --id Telegram.TelegramDesktop
 winget install -e --id Microsoft.Teams
 winget install -e --id AnyDeskSoftwareGmbH.AnyDesk
 winget install -e --id TeamViewer.TeamViewer
-winget install -e --id qishibo.AnotherRedisDesktopManager
+winget install -e --id RedisInsight.RedisInsight
 winget install -e --id RustDesk.RustDesk  
 winget install -e --id WinSCP.WinSCP
 winget install -e --id DevToys-app.DevToys
@@ -95,7 +96,7 @@ winget install -e --id AltSnap.AltSnap
 winget install -e --id JetBrains.Toolbox
 winget install -e --id Docker.DockerDesktop
 winget install -e --id OpenVPNTechnologies.OpenVPN
-winget install -e --id k6.k6
+winget install -e --id GrafanaLabs.k6
 ```
 
 ### Applications to Check Manually
