@@ -80,6 +80,7 @@ winget install -e --id Microsoft.DotNet.SDK.10
 winget install -e --id Microsoft.DotNet.SDK.9
 winget install -e --id Notepad++.Notepad++
 winget install -e --id Microsoft.VisualStudioCode --scope machine
+winget install -e --id Anysphere.Cursor --scope machine
 winget install -e --id Git.Git
 winget install -e --id Python.Python.3.13
 winget install -e --id Postman.Postman
